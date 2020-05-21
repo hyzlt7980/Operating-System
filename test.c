@@ -5,8 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <unistd.h>
-
-int get_size();
+#include <ctype.h>
+void trim_leading(char *str);
 int main(int argc, char *argv[]){
     
    
@@ -58,8 +58,7 @@ int main(int argc, char *argv[]){
                 token = strtok(NULL, ";&");
 
             }
-            for (int k = 0; k < i; ++k) 
-                printf("c1:%s\n", array[k]);
+           
             int fd2[2];
             
             if(pipe(fd2)==-1){
@@ -82,34 +81,36 @@ int main(int argc, char *argv[]){
                     exit(1);
                 }else if(id==0){
                     
-                    
-                    char singe_command[10];
+                    char *begin = malloc(sizeof(char));
+
+                    char singe_command[20];
                     
                     close(fd2[1]);
 
-                    read(fd2[0],singe_command,10);
+                    read(fd2[0],singe_command,20);
 
-                    printf("command:%s\n",singe_command);
-           
+
+                    if(singe_command[0]==' '){
+                        
+                        trim_leading(singe_command);
+                    }
+                
                     char *token_2 = strtok(singe_command," ");
-
                     char *singe_command_component[10];
                     int j = 0;
-
                     while(token_2!=NULL){    
                         singe_command_component[j++]=token_2;
                         token_2 =strtok(NULL," ");
                     }
                     
-                    for (int s = 0; s < j; ++s) 
-                        printf("c2:%s\n", singe_command_component[s]);
+
                     execvp(singe_command,singe_command_component);
 
 
                 }else{        
                 
                     close(fd2[0]);
-                    write(fd2[1],array[k],10);
+                    write(fd2[1],array[k],20);
                     waitpid(id,&status2,0);
                 }
 
@@ -132,4 +133,17 @@ int main(int argc, char *argv[]){
 }
 
 
+void trim_leading(char *str){
 
+    char *p;
+    int i=0;    
+    while(str[i]==' '){
+        i++;
+    }
+    int k=i;
+    for(int j = k;j<sizeof(str);j++){
+        str[j-i]=str[j];
+        str[j]='\0';
+    }
+
+}
