@@ -95,10 +95,9 @@ int main(int argc, char *argv[]){
 
                     char *singe_command_component[10];
                     int j = 0;
-                    singe_command_component[j] = token_2;
 
                     while(token_2!=NULL){    
-                        singe_command_component[++j]=token_2;
+                        singe_command_component[j++]=token_2;
                         token_2 =strtok(NULL," ");
                     }
                     
