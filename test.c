@@ -59,6 +59,7 @@ int main(int argc, char *argv[]){
             printf("test2");
         }else{
         
+        
             write(fd[1],p,20);
             waitpid(pid,&status,0);
                 
