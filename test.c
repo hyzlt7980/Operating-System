@@ -6,23 +6,22 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <unistd.h>
 void trim_leading(char *str);
-int main(int argc, char *argv[]){
-    
-   
-    pid_t pid;
 
+int main(int argc, char *argv[]){
+    pid_t pid;
     int status;
-    
     int fd[2];
-    
-    
-    
     while(1){
-    
-        char *p;
+        pid_t cp=getpid();
+        printf("pid is %d\n",cp);
         printf("$");
+        
+
         size_t bufsize = 100;
+        char *p;
         p = (char *)malloc(bufsize * sizeof(char));
         getline(&p,&bufsize,stdin);
         strtok(p, "\n");
@@ -46,19 +45,22 @@ int main(int argc, char *argv[]){
            
             int status2;
             pid_t id;
-            close(fd[1]);
             char buf[100];
+
+            close(fd[1]);
             read(fd[0],buf,100);
+            
             char *array[10];
             int i = 0;
             char *token = strtok(buf, ";&");
+            
             while (token!= NULL)
             {                
                 array[i++] = token;
                 token = strtok(NULL, ";&");
 
             }
-           
+            
             int fd2[2];
             
             if(pipe(fd2)==-1){
@@ -75,26 +77,16 @@ int main(int argc, char *argv[]){
                 } 
                 
                 id =fork();
-        
+
                 if(id<0){
                     perror("fork");
                     exit(1);
                 }else if(id==0){
-                    
-                    char *begin = malloc(sizeof(char));
-
                     char singe_command[20];
-                    
                     close(fd2[1]);
-
                     read(fd2[0],singe_command,20);
+                    printf("single coomand:%s\n",singe_command);  
 
-
-                    if(singe_command[0]==' '){
-                        
-                        trim_leading(singe_command);
-                    }
-                
                     char *token_2 = strtok(singe_command," ");
                     char *singe_command_component[10];
                     int j = 0;
@@ -102,28 +94,27 @@ int main(int argc, char *argv[]){
                         singe_command_component[j++]=token_2;
                         token_2 =strtok(NULL," ");
                     }
-                    
-
-                    execvp(singe_command,singe_command_component);
-
-
-                }else{        
-                
+                    execvp(singe_command_component[0],singe_command_component);
+               
+    
+                }else{  
+                         
                     close(fd2[0]);
                     write(fd2[1],array[k],20);
                     waitpid(id,&status2,0);
+                    printf("child process in for loop terminate\n");
+
                 }
-
-
-            }    
-        
-
+                
+            }  
+            exit(1);
 
         }else{
 
             close(fd[0]);
             write(fd[1],p,100);
             waitpid(pid,&status,0);
+            printf(" terminated\n");
         }
 
         free(p);
@@ -135,15 +126,12 @@ int main(int argc, char *argv[]){
 
 void trim_leading(char *str){
 
-    char *p;
-    int i=0;    
-    while(str[i]==' '){
-        i++;
+    int size_of_whitespace=0;    
+    while(str[size_of_whitespace]==' '){
+        size_of_whitespace++;
     }
-    int k=i;
-    for(int j = k;j<sizeof(str);j++){
-        str[j-i]=str[j];
-        str[j]='\0';
-    }
+    printf("size of whitespace is %d\n",size_of_whitespace);
+
+    
 
 }
